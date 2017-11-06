@@ -1,0 +1,36 @@
+@import "semantic/semantic";
+@import "icons";
+
+.map-container {
+  width: 100%;
+  position: relative;
+  margin: 1rem 0;
+}
+
+.buttons-container > .ui.dropdown {
+  float: right;
+}
+
+.datamaps-subunit.selected {
+  fill: #444 !important;
+  stroke: #444 !important;
+}
+
+.timeline-container .timeline {
+  position: relative;
+  width: 100%;
+  background: #ccc;
+  border-radius: 3px;
+  height: 1rem;
+  overflow: hidden;
+}
+
+.timeline-container .timeline .bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  padding-left: 50%;
+  background: red;
+  transition: padding-left 0.1s;
+}
