@@ -9,9 +9,16 @@
     <div class="interactive-container">
       <div class="buttons-container">
         <div class="ui toggle buttons">
-          <button class="ui button" data-mode="imports">Imports</button>
-          <button class="ui button" data-mode="exports">Exports</button>
-          <button class="ui button active" data-mode="net">Net</button>
+          <button class="ui button active" data-flow="m">Imports</button>
+          <button class="ui button" data-flow="x">Exports</button>
+        </div>
+        <div class="buttons-container">
+        <div class="ui toggle buttons">
+          <button class="ui button" data-limit="10">Top 10</button>
+          <button class="ui button" data-limit="100">Top 50</button>
+          <button class="ui button" data-limit="0.25">Top 25%</button>
+          <button class="ui button" data-limit="0.50">Top 50%</button>
+          <button class="ui button active" data-limit="1">All</button>
         </div>
         <div class="ui search selection loading dropdown" id="country-search">
           <input type="hidden" name="country">

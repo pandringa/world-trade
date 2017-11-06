@@ -8,51 +8,45 @@ Array.prototype.max = function() {
 var TIMELINE_WIDTH = $('#timeline').width();
 var STARTYEAR = 1962.0;
 var ENDYEAR = 2016.0;
-var FLOW = 'Exports';
-var CUTOFF = 1000;
+var FLOW = 'm';
+var LIMIT = 1;
 var CURRENT_COUNTRY_DATA = null;
 var CURRENT_COUNTRY = null;
 
-function selectData(trade, flow){
-  if(flow.toLowerCase() == 'net'){
-    return trade['x'] - trade['m'];
-  } else {
-    if(flow.length > 1) flow = flow.toLowerCase().substring(1,2);
-    return trade[flow];
-  }
-}
 function calcWidth(amount){
-  return parseInt(5 * amount / 90000000)+1;
+  return Math.floor(5 * amount / 90000000)+1;
 }
 function calcColor(amount, flow){
-  if(flow.length > 1) flow = flow.substring(1,2);
   var a = amount / 200000000 + 0.4;
   return flow == 'x' ? 'rgba(0,200,0,'+a+')' : 'rgba(200,0,0,'+a+')';
 }
-function renderMap(map, data, country, year){
-  var FLOW = 'Exports';
-  var LIMIT = 0.5;
+function renderMap(map, data, country, year, flowDir, lim){
   $('#timeline .bar').css('padding-left', getX(year));
   if(data[year]){
     var arcs = Object.keys(data[year]).map(partner => {
-        var amount = selectData(data[year][partner], FLOW);
+        var amount = data[year][partner][flowDir]
         if(amount == undefined) return false;
         return {
           origin: country, 
           destination: partner,
           strokeWidth: calcWidth(amount),
-          strokeColor: calcColor(amount, FLOW),
+          strokeColor: calcColor(amount, flowDir),
           amount: amount,
         }
       })
       .filter(d => d)
       .sort((t1, t2) => t2.amount - t1.amount)
-    if(LIMIT){
-      var lim = LIMIT < 1 ? LIMIT * arcs.length : LIMIT;
+    if(lim){
+      lim = lim <= 1 ? lim * arcs.length : lim;
       arcs = arcs.slice(0, lim)
     }
-    console.log(arcs);
-    map.arc(arcs);
+    for(var arc of arcs){
+      console.log(arc.destination, arc.amount, arc.strokeWidth, arc.strokeColor);
+    }
+    var options = { 
+      idFunction: a => a.origin + a.destination
+    };
+    map.arc(arcs, options);
   }else{
     console.log("No data for year", year)
   }
@@ -77,7 +71,7 @@ function updateCountry(map, country){
       if(year < STARTYEAR) STARTYEAR = year;
     }
     var currentYear = getClosestYear(parseInt($('#timeline .bar').css('padding-left')));
-    renderMap(map, data, country, currentYear);
+    renderMap(map, data, country, currentYear, FLOW, LIMIT);
   });
 }
 
@@ -121,6 +115,9 @@ $(document).ready(() => {
   $('.ui.buttons .button').click((e) => {
     $(e.target).siblings('.active').removeClass('active');
     $(e.target).addClass('active');
+    FLOW = $(e.target).data('flow') || FLOW;
+    LIMIT = $(e.target).data('limit') || LIMIT;
+    renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT);
   });
 
   window.addEventListener('resize', e => map.resize());
@@ -132,7 +129,8 @@ $(document).ready(() => {
     timelineClick = true;
     timelineLeft = e.screenX - e.offsetX;
     currentYear = getClosestYear(e.screenX-timelineLeft);
-    requestAnimationFrame(() => renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear));
+    // requestAnimationFrame(() => renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear));
+    renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
   });
   $(document).mouseup(e => {
     timelineClick = false;
@@ -140,7 +138,8 @@ $(document).ready(() => {
   $(document).mousemove(e => {
     if(timelineClick == false) return;
     currentYear = getClosestYear(e.screenX-timelineLeft);
-    requestAnimationFrame(() => renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear));
+    // requestAnimationFrame(() => renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear));
+    renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
   });
 });
 
