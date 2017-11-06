@@ -31,7 +31,7 @@ function calcColor(amount, flow){
 }
 function renderMap(map, data, country, year){
   var FLOW = 'Exports';
-  var LIMIT = 0.25;
+  var LIMIT = 0.5;
   $('#timeline .bar').css('padding-left', getX(year));
   if(data[year]){
     var arcs = Object.keys(data[year]).map(partner => {
@@ -47,7 +47,7 @@ function renderMap(map, data, country, year){
       })
       .filter(d => d)
       .sort((t1, t2) => t2.amount - t1.amount)
-    if(LIMIT != false){
+    if(LIMIT){
       var lim = LIMIT < 1 ? LIMIT * arcs.length : LIMIT;
       arcs = arcs.slice(0, lim)
     }
@@ -76,7 +76,8 @@ function updateCountry(map, country){
       if(year > ENDYEAR) ENDYEAR = year;
       if(year < STARTYEAR) STARTYEAR = year;
     }
-    renderMap(map, data, country, year);
+    var currentYear = getClosestYear(parseInt($('#timeline .bar').css('padding-left')));
+    renderMap(map, data, country, currentYear);
   });
 }
 
