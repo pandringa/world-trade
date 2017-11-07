@@ -204,6 +204,7 @@ $(document).ready(() => {
   var timelineClick = false,
       timelineLeft = 0,
       currentYear = getClosestYear(parseInt($('#timeline .bar').css('padding-left')));
+  
   $('#timeline').mousedown(e => {
     timelineClick = true;
     timelineLeft = e.screenX - e.offsetX;
