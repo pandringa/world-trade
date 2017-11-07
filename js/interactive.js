@@ -96,7 +96,7 @@ function InteractiveMap(){
     if(self.country_data[self.year]){
       var arcs = Object.keys(self.country_data[self.year]).map(partner => {
           var amount = self.country_data[self.year][partner][self.flow]
-          if(amount == undefined) return false;
+          if(amount == undefined || Math.floor(amount) == 0) return false;
           return {
             origin: self.flow == 'x' ? self.country : partner, 
             destination: self.flow == 'x' ? partner : self.country,
