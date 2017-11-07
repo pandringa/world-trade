@@ -12,6 +12,12 @@
 }
 @font-face {
   font-family: 'Franklin';
+  src: url('../fonts/franklin/franklin-normal-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Franklin';
   src: url('../fonts/franklin/franklin-normal-700.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
@@ -58906,6 +58912,26 @@ p {
   left: 1px;
   width: calc(98%);
   height: calc(98%);
+}
+footer {
+  position: relative;
+  font-family: 'Franklin', 'Helvetica', sans-serif;
+  font-weight: 500;
+  color: #555;
+  text-align: left;
+  margin: 2rem 0 1rem;
+  padding: 1rem 0;
+  font-size: 1rem;
+}
+footer:before {
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5rem;
+  height: 0.25rem;
+  background-color: #555;
 }
 @media only screen and (max-width: 768px) {
   .timeline-years {
