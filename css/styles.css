@@ -58907,3 +58907,29 @@ p {
   width: calc(98%);
   height: calc(98%);
 }
+@media only screen and (max-width: 768px) {
+  .timeline-years {
+    left: 0;
+  }
+  .timeline-container .timeline-buttons {
+    flex-basis: 100%;
+    order: 3;
+  }
+  .timeline-container .timeline {
+    flex-basis: 100%;
+    margin-left: 0;
+    margin-bottom: 1rem;
+  }
+  .buttons-container > .buttons {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+  .buttons-container > .ui.dropdown {
+    float: none;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+  .map-container .current-year {
+    font-size: 2.5rem;
+  }
+}

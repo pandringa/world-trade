@@ -12,12 +12,13 @@ var FLOW = 'm';
 var LIMIT = 1;
 var CURRENT_COUNTRY_DATA = null;
 var CURRENT_COUNTRY = null;
-var YEAR_INTERVAL = 5;
+var YEAR_INTERVAL = $(window).width() > 768 ? 5 : 10;
 var OFFSET = 5; // Offset timeline 5px from start
 var ROW_COUNT = 10;
 var COUNTRY_INDEX = {};
 
 function renderYears(start, end){
+  TIMELINE_WIDTH = $('#timeline').width()
   var years = [...Array(end-start).keys()].map(n => n + start).filter(n => n % YEAR_INTERVAL == 0);
 
   var labels = d3.select('.timeline-years')
