@@ -15,6 +15,7 @@ var CURRENT_COUNTRY = null;
 var YEAR_INTERVAL = 5;
 var OFFSET = 5; // Offset timeline 5px from start
 var ROW_COUNT = 10;
+var COUNTRY_INDEX = {};
 
 function renderYears(start, end){
   var years = [...Array(end-start).keys()].map(n => n + start).filter(n => n % YEAR_INTERVAL == 0);
@@ -67,8 +68,30 @@ function renderMap(map, data, country, year, flowDir, lim){
     console.log("No data for year", year)
   }
 }
-function renderTable(data, count){
-  console.log("Render table with "+count+" rows")
+function renderTable(data, count, year){
+  var rows = Object.keys(data[year]).map(code => {
+    return {
+      name: COUNTRY_INDEX[code],
+      imports: data[year][code].m,
+      exports: data[year][code].x
+    }
+  }).sort((a,b) => {
+    return (b.exports+b.imports) - (a.exports+a.imports)
+  })
+
+  if(count != 'all' && parseInt(count) > 0 && parseInt(count) <= rows.length){
+    rows = rows.slice(0, parseInt(count))
+  }
+  var table = d3.select('#country-table tbody')
+    .selectAll('tr')
+    .data(rows)
+
+  table.exit().remove()
+
+  var row = table.enter().append('tr')
+  row.append('td').text(d => d.name)
+  row.append('td').text(d => Math.round(d.imports / 1000))
+  row.append('td').text(d => Math.round(d.exports / 1000))
 }
 function updateCountry(map, country){
   while($('.datamaps-subunit.selected')[0]) $('.datamaps-subunit.selected').removeClass('selected');
@@ -91,8 +114,8 @@ function updateCountry(map, country){
     renderYears(STARTYEAR, ENDYEAR)
     var currentYear = getClosestYear(parseInt($('#timeline .bar').css('padding-left')));
     renderMap(map, data, country, currentYear, FLOW, LIMIT);
-    renderTable(data, ROW_COUNT);
     $('#country-search').dropdown("set selected", country);
+    $('#row-count').dropdown("set selected", ROW_COUNT)
   });
 }
 
@@ -147,9 +170,9 @@ $(document).ready(() => {
     action: 'activate',
     onChange: count => {
       ROW_COUNT = count;
-      renderTable(CURRENT_COUNTRY_DATA, ROW_COUNT);
+      renderTable(CURRENT_COUNTRY_DATA, ROW_COUNT, currentYear);
     }
-  }).dropdown('set selected', ROW_COUNT);
+  })
 
   $('.ui.buttons .button').click((e) => {
     $(e.target).siblings('.active').removeClass('active');
@@ -184,15 +207,18 @@ $(document).ready(() => {
   $('.timeline-buttons .stepUp').click(e => {
     currentYear = stepUpYear(currentYear);
     renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+    renderTable(CURRENT_COUNTRY_DATA, ROW_COUNT, currentYear)
   });
   $('.timeline-buttons .stepDown').click(e => {
     currentYear = stepDownYear(currentYear);
     renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+    renderTable(CURRENT_COUNTRY_DATA, ROW_COUNT, currentYear)
   });
 
   $('.timeline-buttons .reset').click(e => {
     currentYear = STARTYEAR;
     renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+    renderTable(CURRENT_COUNTRY_DATA, ROW_COUNT, currentYear)
   });
 
   var playTimer = false;
@@ -219,6 +245,7 @@ $(document).ready(() => {
 $.ajax({
   url: 'data/countries/index.json'
 }).done(countries => {
+  COUNTRY_INDEX = countries;
   $dropdown = $('#country-search .menu');
   for(var code of Object.keys(countries).sort()){
     $dropdown.append("<div class='item' data-value='"+code+"'>"+countries[code]+"</div>");

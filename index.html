@@ -55,7 +55,7 @@
     <p>Take a look at the table below for the how the 20 biggest economies trade together. Use the tab buttons to cycle through different sets of economies.</p>
   </div>
   <div class="ui container table-container">
-    <table class="ui celled compact definition table">
+    <table class="ui celled compact definition table" id="country-table">
       <thead><tr>
         <th class="dropdown-cell">
           <div class="ui selection dropdown compact" id="row-count">
@@ -71,20 +71,11 @@
             </div>
           </div>
         </th>
-        <th>Imports</th>
-        <th>Exports</th>
+        <th>Imports (Million USD)</th>
+        <th>Exports (Million USD)</th>
       </tr></thead>
       <tbody>
-        <tr>
-          <td>reset rating</td>
-          <td>None</td>
-          <td>Resets rating to default value</td>
-        </tr>
-        <tr>
-          <td>set rating</td>
-          <td>rating (integer)</td>
-          <td>Sets the current star rating to specified value</td>
-        </tr>
+        
     </tbody></table>
   </div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
