@@ -100,7 +100,9 @@ function renderTable(data, count){
   var row = table.enter().append('tr')
   row.append('td').text(d => d.name)
   row.append('td').text(d => Math.round(d.imports / 1000))
+    .attr('data-sort-value', d => d.imports)
   row.append('td').text(d => Math.round(d.exports / 1000))
+    .attr('data-sort-value', d => d.exports)
 
   $('#country-name').text(COUNTRY_INDEX[CURRENT_COUNTRY]);
   $('#data-year').text(year);
@@ -172,6 +174,8 @@ $(document).ready(() => {
     }
   });
   updateCountry(map, 'USA');
+
+  $('#country-table').tablesort();
 
   $('#country-search')
   .dropdown({
