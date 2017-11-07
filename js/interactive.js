@@ -172,7 +172,10 @@ function InteractiveMap(){
     renderMap();
   }
   this.setCountry = function setCountry(country){
-    while($('.datamaps-subunit.selected')[0]) $('.datamaps-subunit.selected').removeClass('selected');
+    while($('.datamaps-subunit.selected')[0]){
+      $('.datamaps-subunit.selected').attr('style', 'fill: rgb(212, 223, 239); stroke-width: 1px; stroke-opacity: 1; stroke: rgb(253, 253, 253); fill-opacity: 1;');
+      $('.datamaps-subunit.selected').removeClass('selected');
+    } 
     $('.datamaps-subunit.'+country).addClass('selected');
     $.ajax({
       url: 'data/countries/'+country+'.json'
