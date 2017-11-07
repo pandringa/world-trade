@@ -6,7 +6,17 @@ country_index = {}
 count = 0
 parseCount = 0
 
-with open("wits.csv") as csvfile:
+country_replace = {
+  'CSK': 'CZE', # Czechoslovakia -> Czech Republic 
+  'TMP': 'TLS', # Timor -> Timor Leste
+  'DDR': 'DEU', # East Germany -> Germany
+  'ANT': 'CUW', # Netherlands Antilles -> Curacao
+  'SVU': 'RUS', # Soviet Union -> Russia
+  'YUG': 'SER', # Yugoslavia -> Serbia
+  'ZAR': 'COD', # Zaire -> Dem. Rep. Congo
+}
+
+with open("wits_full.csv") as csvfile:
   for row in csv.DictReader(csvfile):
     count += 1
     code = row['ReporterISO3']
@@ -14,6 +24,11 @@ with open("wits.csv") as csvfile:
     year = row['Year']
     flow = row['TradeFlowName'].lower()[1:2]
     
+    if code in country_replace: 
+      code = country_replace[code]
+    if partner in country_replace:
+      partner = country_replace[partner]
+
     if code not in country_index:
       country_index[code] = row['ReporterName'].decode('latin-1')
     if partner not in country_index:
@@ -25,7 +40,7 @@ with open("wits.csv") as csvfile:
     if partner not in countries[code][year]:
       countries[code][year][partner] = {}
     if flow in countries[code][year][partner]:
-      print "DUPLICATE %s -> %s (%s %s)" % (code, partner, year, flow)
+      countries[code][year][partner][flow] += float(row['TradeValue'])
     countries[code][year][partner][flow] = float(row['TradeValue'])
     parseCount += 1
 
