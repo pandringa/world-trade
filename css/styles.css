@@ -58832,11 +58832,19 @@ p {
 .table-container {
   font-family: 'Franklin', 'Helvetica', sans-serif;
   font-size: 1rem;
+  position: relative;
+}
+.table-container .loader {
+  top: 8rem;
 }
 .map-container {
   width: 100%;
   position: relative;
   margin: 1rem 0;
+  min-height: 2rem;
+}
+.map-container .loader {
+  top: 2rem;
 }
 .map-container .current-year {
   position: absolute;
@@ -58873,6 +58881,7 @@ p {
   overflow: hidden;
   height: 2.5rem;
   margin-left: 1rem;
+  cursor: pointer;
 }
 .timeline-container .timeline-buttons {
   flex-grow: 0;

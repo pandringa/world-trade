@@ -1,14 +1,8 @@
-Array.prototype.max = function() {
-  var max = -999999999999999999;
-  for(var i of this)
-    if(i > max) max = i;
-  return max;
-}
-
-// Set up Interactive
-function Interactive(){
+// Interactive constructor
+function InteractiveMap(){
   var self = this;
 
+  // Instance Variables
   this.country_index = {};
   this.country = null;
   this.country_data = null;
@@ -150,8 +144,34 @@ function Interactive(){
   this.resetYear = function resetYear(){
     self.setYear(self.start_year);
   }
+  this.setClosestYear = function setClosestYear(x){
+    self.setYear(getClosestYear(x));
+  }
+  this.resize = function resize(){
+    self.map.resize();
+  }
+  this.play = function play(onChange) {
+    self.play_timer = setInterval(() => {
+      self.incrementYear({noTable: true});
+      if(self.year == self.end_year) self.pause(onChange);
+    }, 90);
+    onChange();
+    return self.play_timer;
+  }
+  this.pause = function pause(onChange) {
+    clearInterval(self.play_timer);
+    self.play_timer = false;
+    renderTable();
+    onChange();
+    return self.play_timer;
+  }
 
-  this.updateCountry = function updateCountry(map, country){
+  this.setToggles = function setToggles(flow, limit){
+    self.flow = flow || self.flow;
+    self.limit = limit || self.limit;
+    renderMap();
+  }
+  this.setCountry = function setCountry(country){
     while($('.datamaps-subunit.selected')[0]) $('.datamaps-subunit.selected').removeClass('selected');
     $('.datamaps-subunit.'+country).addClass('selected');
     $.ajax({
@@ -172,7 +192,8 @@ function Interactive(){
       renderYears(self.start_year, self.end_year)
       self.year = getClosestYear(parseInt($('#timeline .bar').css('padding-left')));
       renderMap();
-      renderTable()
+      renderTable();
+      $('.table-container .loader').remove();
       $('#country-search').dropdown("set selected", country);
       $('#row-count').dropdown("set selected", self.table_row_count);
     });
@@ -192,7 +213,8 @@ function Interactive(){
       highlightBorderColor: '#C0C1C2',
     },
     done: datamap => {
-      datamap.svg.selectAll('.datamaps-subunit').on('click', geo => self.updateCountry(datamap, geo.id))
+      $('#datamap .loader').remove();
+      datamap.svg.selectAll('.datamaps-subunit').on('click', geo => self.setCountry(geo.id))
     }
   });
 
@@ -208,12 +230,12 @@ function Interactive(){
     $('#country-search')
     .dropdown({
       action: 'activate',
-      onChange: code => self.updateCountry(self.map, code)
+      onChange: code => self.setCountry(code)
     });
     $('#country-search').removeClass('loading');
   });
 
-  self.updateCountry(self.map, 'USA');
+  self.setCountry('USA');
   $('#country-table').tablesort();
 
   // Dropdowns
@@ -224,71 +246,47 @@ function Interactive(){
       renderTable();
     }
   });
-
-  var timelineClick = false,
-      timelineLeft = 0;
-  
-  // Event Listeners
-  $('.ui.buttons .button').click((e) => {
-    $(e.target).siblings('.active').removeClass('active');
-    $(e.target).addClass('active');
-    self.flow = $(e.target).data('flow') || self.flow;
-    self.limit = $(e.target).data('limit') || self.limit;
-    renderMap();
-  });
-
-  window.addEventListener('resize', e => map.resize());
-  
-  $('#timeline').mousedown(e => {
-    timelineClick = true;
-    timelineLeft = e.screenX - e.offsetX;
-    self.year = getClosestYear(e.screenX-timelineLeft);
-    renderTable();
-    renderMap();
-  });
-  $(document).mouseup(e => {
-    timelineClick = false;
-  });
-  $(document).mousemove(e => {
-    if(timelineClick == false) return;
-    self.year = getClosestYear(e.screenX-timelineLeft);
-    renderTable();
-    renderMap();
-  });
-
-  this.play = function play() {
-    self.play_timer = setInterval(() => {
-      self.incrementYear({noTable: true});
-      if(self.year == self.end_year) self.pause();
-    }, 90);
-  }
-  this.pause = function pause() {
-    clearInterval(self.play_timer);
-    self.play_timer = false;
-    renderTable();
-  }
-
-  this.togglePlay = function togglePlay() {
-    if(self.play_timer){
-      self.pause();
-    } else {
-      self.play();
-    }
-  }
 }
 
 $(document).ready(() => {
-  var interactive = new Interactive();
+  var interactive = new InteractiveMap();
 
+  // Top bar toggle events
+  $('.ui.buttons .button').click((e) => {
+    $(e.target).siblings('.active').removeClass('active');
+    $(e.target).addClass('active');
+    interactive.setToggles($(e.target).data('flow'), $(e.target).data('limit'));
+  });
+
+  // Resize map with window
+  window.addEventListener('resize', e => map.resize());
+  
+  // Timeline mouse events
+  var isTimelineClick = false, timelineLeft = 0;
+  $('#timeline').mousedown(e => {
+    isTimelineClick = true;
+    timelineLeft = e.screenX - e.offsetX;
+    interactive.setClosestYear(e.screenX-timelineLeft);
+  });
+  $(document).mousemove(e => {
+    if(isTimelineClick) interactive.setClosestYear(e.screenX-timelineLeft);
+  });
+  $(document).mouseup( e => {
+    if(isTimelineClick) isTimelineClick = false; 
+  });
+
+  // Timeline button events
+  var isPlaying = false;
+  function togglePlayPause() {
+    $('.play-pause i').toggleClass('icon-play');
+    $('.play-pause i').toggleClass('icon-pause');
+    isPlaying = !isPlaying;
+  }
+  $('.timeline-buttons .play-pause').click(e => {
+    isPlaying ? interactive.pause(togglePlayPause) : interactive.play(togglePlayPause);
+  });
   $('.timeline-buttons .stepUp').click( e => interactive.incrementYear() );
   $('.timeline-buttons .stepDown').click( e => interactive.decrementYear() );
   $('.timeline-buttons .reset').click( e => interactive.resetYear() );
-
-  $('.timeline-buttons .play-pause').click(e => {
-    $('.play-pause i').toggleClass('icon-play');
-    $('.play-pause i').toggleClass('icon-pause');
-    
-    interactive.togglePlay();
-  });
 });
 
