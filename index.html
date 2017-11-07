@@ -5,17 +5,20 @@
 </head>
 <body>
   <div class="ui container">
-    <h1>World Trade: A History</h1>
+    <div class="headline-container">
+      <h1>Viewing World Trade through the Lens of History</h1>
+      <h5>By <a target="_blank" href="https://peterandringa.com">Peter Andringa</a><span class="light">NOV. 7, 2017</span></h5>
+      <p>The recent surge in American nationalism promoted by populists like President Trump has provoked a renewed conversation around America's participation in world trade. But this is not the first major shift in American trade policy - many other events have impacted world trade over the last 50 years.
+      </p>
+    </div>
     <div class="interactive-container">
       <div class="buttons-container">
         <div class="ui toggle buttons">
           <button class="ui button active" data-flow="m">Imports</button>
           <button class="ui button" data-flow="x">Exports</button>
         </div>
-        <div class="buttons-container">
         <div class="ui toggle buttons">
           <button class="ui button" data-limit="10">Top 10</button>
-          <button class="ui button" data-limit="100">Top 50</button>
           <button class="ui button" data-limit="0.25">Top 25%</button>
           <button class="ui button" data-limit="0.50">Top 50%</button>
           <button class="ui button active" data-limit="1">All</button>
@@ -25,15 +28,21 @@
           <i class="dropdown icon"></i>
           <div class="default text">Select Country</div>
           <div class="menu"></div>
-         </div>
+        </div>
       </div>
-      <div class="map-container" id="datamap"></div>
+      <div class="map-container" id="datamap">
+        <div class="current-year" id="current-year"></div>
+      </div>
       <div class="timeline-container">
       </div>
       <div class="timeline-container">
+        <div class="timeline-years">
+        </div>
         <div class="timeline-buttons ui icon buttons">
-          <button class="ui button play-pause"><i class="icon-play"></i></button>
-          <button class="ui button step"><i class="icon-step_forward"></i></button>
+          <button class="ui button reset" tabIndex="-1"><i class="icon-reload" ></i></button>
+          <button class="ui button stepDown" tabIndex="-1"><i class="icon-step_backward" ></i></button>
+          <button class="ui button play-pause" tabIndex="-1"><i class="icon-play" ></i></button>
+          <button class="ui button stepUp" tabIndex="-1"><i class="icon-step_forward" ></i></button>
         </div>
         <div class="timeline" id="timeline">
           <div class="timeline-flags"></div>
@@ -41,6 +50,42 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="text-container">
+    <p>Take a look at the table below for the how the 20 biggest economies trade together. Use the tab buttons to cycle through different sets of economies.</p>
+  </div>
+  <div class="ui container table-container">
+    <table class="ui celled compact definition table">
+      <thead><tr>
+        <th class="dropdown-cell">
+          <div class="ui selection dropdown compact" id="row-count">
+            <input type="hidden" name="gender">
+            <i class="dropdown icon"></i>
+            <div class="default text">Show</div>
+            <div class="menu">
+              <div class="item default" data-value="10">Top 10 Partners</div>
+              <div class="item" data-value="25">Top 25 Partners</div>
+              <div class="item" data-value="50">Top 50 Partners</div>
+              <div class="item" data-value="100">Top 100 Partners</div>
+              <div class="item" data-value="all">All Partners</div>
+            </div>
+          </div>
+        </th>
+        <th>Imports</th>
+        <th>Exports</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>reset rating</td>
+          <td>None</td>
+          <td>Resets rating to default value</td>
+        </tr>
+        <tr>
+          <td>set rating</td>
+          <td>rating (integer)</td>
+          <td>Sets the current star rating to specified value</td>
+        </tr>
+    </tbody></table>
   </div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>

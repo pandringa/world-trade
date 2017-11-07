@@ -12,13 +12,31 @@ var FLOW = 'm';
 var LIMIT = 1;
 var CURRENT_COUNTRY_DATA = null;
 var CURRENT_COUNTRY = null;
+var YEAR_INTERVAL = 5;
+var OFFSET = 5; // Offset timeline 5px from start
+var ROW_COUNT = 10;
 
+function renderYears(start, end){
+  var years = [...Array(end-start).keys()].map(n => n + start).filter(n => n % YEAR_INTERVAL == 0);
+  console.log(years);
+
+  d3.select('.timeline-years')
+    .selectAll('span.year')
+    .data(years)
+    .enter()
+      .append('span')
+      .attr('class', 'year')
+      .style('left', year => {
+        return getX(year);
+      })
+      .text(year => year)
+}
 function calcWidth(amount){
   return Math.floor(5 * amount / 90000000)+1;
 }
 function calcColor(amount, flow){
   var a = amount / 200000000 + 0.4;
-  return flow == 'x' ? 'rgba(0,200,0,'+a+')' : 'rgba(200,0,0,'+a+')';
+  return flow == 'x' ? 'rgba(43,102,144,'+a+')' : 'rgba(43,102,144,'+a+')';
 }
 function renderMap(map, data, country, year, flowDir, lim){
   $('#timeline .bar').css('padding-left', getX(year));
@@ -40,20 +58,20 @@ function renderMap(map, data, country, year, flowDir, lim){
       lim = lim <= 1 ? lim * arcs.length : lim;
       arcs = arcs.slice(0, lim)
     }
-    for(var arc of arcs){
-      console.log(arc.destination, arc.amount, arc.strokeWidth, arc.strokeColor);
-    }
     var options = { 
       idFunction: a => a.origin + a.destination
     };
+    $('#current-year').text(year);
     map.arc(arcs, options);
   }else{
     console.log("No data for year", year)
   }
 }
+function renderTable(data, count){
+  console.log("Render table with "+count+" rows")
+}
 function updateCountry(map, country){
-  $('#country-search').dropdown("set selected", country);
-  $('.datamaps-subunit.selected').removeClass('selected');
+  while($('.datamaps-subunit.selected')[0]) $('.datamaps-subunit.selected').removeClass('selected');
   $('.datamaps-subunit.'+country).addClass('selected');
   $.ajax({
     url: 'data/countries/'+country+'.json'
@@ -70,25 +88,33 @@ function updateCountry(map, country){
       if(year > ENDYEAR) ENDYEAR = year;
       if(year < STARTYEAR) STARTYEAR = year;
     }
+    renderYears(STARTYEAR, ENDYEAR)
     var currentYear = getClosestYear(parseInt($('#timeline .bar').css('padding-left')));
     renderMap(map, data, country, currentYear, FLOW, LIMIT);
+    renderTable(data, ROW_COUNT);
+    $('#country-search').dropdown("set selected", country);
   });
 }
 
 function getX(year) {
-  return (year-STARTYEAR) / (ENDYEAR-STARTYEAR) * TIMELINE_WIDTH;
+  return (year-STARTYEAR) / (ENDYEAR-STARTYEAR) * (TIMELINE_WIDTH-OFFSET) + OFFSET;
 }
 function getClosestYear(x){
-  var guess = Math.round(x /  TIMELINE_WIDTH * (ENDYEAR - STARTYEAR) + STARTYEAR);
+  var guess = Math.round((x-OFFSET) /  (TIMELINE_WIDTH-OFFSET) * (ENDYEAR - STARTYEAR) + STARTYEAR);
   if(!CURRENT_COUNTRY_DATA || CURRENT_COUNTRY_DATA[guess]) return guess;
   var up = guess, down = guess;
   while(up <= ENDYEAR && CURRENT_COUNTRY_DATA[up] == undefined) up++;
   while(down >= STARTYEAR && CURRENT_COUNTRY_DATA[down] == undefined) down--;
   return (up - guess) < (down - guess) ? up : down;
 }
-function stepYear(year){
+function stepUpYear(year){
   year++;
   while(CURRENT_COUNTRY_DATA && year <= ENDYEAR && CURRENT_COUNTRY_DATA[year] == undefined) year++;
+  return year;
+}
+function stepDownYear(year){
+  year--;
+  while(CURRENT_COUNTRY_DATA && year >= STARTYEAR && CURRENT_COUNTRY_DATA[year] == undefined) year--;
   return year;
 }
 
@@ -99,11 +125,11 @@ $(document).ready(() => {
     responsive: true,
     projection: 'mercator',
     fills: {
-        defaultFill: 'rgba(33,133,208,0.4)',
+        defaultFill: 'rgba(212,223,239,1)',
     },
     geographyConfig: {
-      highlightFillColor: 'rgba(33,133,208,1)',
-      highlightBorderColor: 'rgba(33,133,208,1)',
+      highlightFillColor: '#C0C1C2',
+      highlightBorderColor: '#C0C1C2',
     },
     done: datamap => {
       datamap.svg.selectAll('.datamaps-subunit').on('click', geo => updateCountry(datamap, geo.id))
@@ -114,8 +140,16 @@ $(document).ready(() => {
   $('#country-search')
   .dropdown({
     action: 'activate',
-    onChange: (code) => updateCountry(map, code)
+    onChange: code => updateCountry(map, code)
   });
+
+  $('#row-count').dropdown({
+    action: 'activate',
+    onChange: count => {
+      ROW_COUNT = count;
+      renderTable(CURRENT_COUNTRY_DATA, ROW_COUNT);
+    }
+  }).dropdown('set selected', ROW_COUNT);
 
   $('.ui.buttons .button').click((e) => {
     $(e.target).siblings('.active').removeClass('active');
@@ -147,14 +181,36 @@ $(document).ready(() => {
     renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
   });
 
-  $('.timeline-buttons .step').click(e => {
-    currentYear = stepYear(currentYear);
+  $('.timeline-buttons .stepUp').click(e => {
+    currentYear = stepUpYear(currentYear);
+    renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+  });
+  $('.timeline-buttons .stepDown').click(e => {
+    currentYear = stepDownYear(currentYear);
     renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
   });
 
+  $('.timeline-buttons .reset').click(e => {
+    currentYear = STARTYEAR;
+    renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+  });
+
+  var playTimer = false;
   $('.timeline-buttons .play-pause').click(e => {
-    $('.timeline-buttons i.play').removeClass('play');
-    $('.timeline-buttons i.play').addClass('pause');
+    $('.play-pause i').toggleClass('icon-play');
+    $('.play-pause i').toggleClass('icon-pause');
+    
+    if(!playTimer){
+      if(currentYear == ENDYEAR) $('.timeline-buttons .reset').click();
+      playTimer = setInterval(() => {
+        currentYear = stepUpYear(currentYear);
+        renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT);
+        if(currentYear == ENDYEAR) $(e.target).click();
+      }, 90);
+    }else{
+      clearInterval(playTimer);
+      playTimer = false;
+    }
   });
 });
 
