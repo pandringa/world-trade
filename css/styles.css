@@ -58795,13 +58795,20 @@ body.pushable > .pusher {
   fill: #444 !important;
   stroke: #444 !important;
 }
+.timeline-container {
+  display: flex;
+}
 .timeline-container .timeline {
+  flex-grow: 2;
   position: relative;
-  width: 100%;
   background: #ccc;
   border-radius: 3px;
-  height: 1rem;
   overflow: hidden;
+  height: 2.5rem;
+  margin-left: 1rem;
+}
+.timeline-container .timeline-buttons {
+  flex-grow: 0;
 }
 .timeline-container .timeline .bar {
   position: absolute;

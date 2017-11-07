@@ -27,8 +27,8 @@ function renderMap(map, data, country, year, flowDir, lim){
         var amount = data[year][partner][flowDir]
         if(amount == undefined) return false;
         return {
-          origin: country, 
-          destination: partner,
+          origin: flowDir == 'x' ? country : partner, 
+          destination: flowDir == 'x' ? partner : country,
           strokeWidth: calcWidth(amount),
           strokeColor: calcColor(amount, flowDir),
           amount: amount,
@@ -86,6 +86,11 @@ function getClosestYear(x){
   while(down >= STARTYEAR && CURRENT_COUNTRY_DATA[down] == undefined) down--;
   return (up - guess) < (down - guess) ? up : down;
 }
+function stepYear(year){
+  year++;
+  while(CURRENT_COUNTRY_DATA && year <= ENDYEAR && CURRENT_COUNTRY_DATA[year] == undefined) year++;
+  return year;
+}
 
 
 $(document).ready(() => {
@@ -140,6 +145,16 @@ $(document).ready(() => {
     currentYear = getClosestYear(e.screenX-timelineLeft);
     // requestAnimationFrame(() => renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear));
     renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+  });
+
+  $('.timeline-buttons .step').click(e => {
+    currentYear = stepYear(currentYear);
+    renderMap(map, CURRENT_COUNTRY_DATA, CURRENT_COUNTRY, currentYear, FLOW, LIMIT)
+  });
+
+  $('.timeline-buttons .play-pause').click(e => {
+    $('.timeline-buttons i.play').removeClass('play');
+    $('.timeline-buttons i.play').addClass('pause');
   });
 });
 
