@@ -262,7 +262,7 @@ $(document).ready(() => {
   });
 
   // Resize map with window
-  window.addEventListener('resize', e => map.resize());
+  window.addEventListener('resize', e => interactive.resize());
   
   // Timeline mouse events
   var isTimelineClick = false, timelineLeft = 0;
