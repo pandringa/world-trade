@@ -46,19 +46,21 @@ function InteractiveMap(){
       .selectAll('span.year')
       .data(years, d => d+self.country);
 
-    labels.style('left', year => {
-          return getX(year);
-        })
-
     labels.exit().remove();
 
     labels.enter()
         .append('span')
         .attr('class', 'year')
-        .style('left', year => {
-          return getX(year);
+        .attr('style', year => {
+          return "left:"+getX(year)+"px;";
         })
         .text(year => year);
+
+    labels.attr('style', year => {
+          return "left:"+getX(year)+"px;";
+        })
+
+    console.log(labels)
   }
   function renderTable(){
     var rows = Object.keys(self.country_data[self.year]).map(code => {
